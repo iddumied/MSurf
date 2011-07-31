@@ -4,7 +4,7 @@ void save_to_history(char *uri);
 
 void save_to_history(char *uri)
 {
-  char curdate[220], line[3000];
+  char curdate[25], line[300];
   time_t t = time(NULL);
   struct tm *ts = localtime(&t);
 
