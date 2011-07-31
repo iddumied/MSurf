@@ -113,6 +113,8 @@ static void zoom(Client *c, const Arg *arg);
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
+#include "history.c"
+
 
 char *
 buildpath(const char *path) {
@@ -375,6 +377,8 @@ loadstatuschange(WebKitWebView *view, GParamSpec *pspec, Client *c) {
 	case WEBKIT_LOAD_FINISHED:
 		c->progress = 0;
 		update(c);
+    printf("\nURL: %s\n",geturi(c));
+    save_to_history(geturi(c));
 		break;
 	default:
 		break;
@@ -397,11 +401,7 @@ loaduri(Client *c, const Arg *arg) {
 	}
 	else {
 		webkit_web_view_load_uri(c->view, u);
-    FILE *f;
-    f = fopen(historyfile, "a+");
-    fprintf(f, u);
-    fclose(f);
-		c->progress = 0;
+  	c->progress = 0;
 		c->title = copystr(&c->title, u);
 		g_free(u);
 		update(c);
