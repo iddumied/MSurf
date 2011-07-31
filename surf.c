@@ -377,7 +377,6 @@ loadstatuschange(WebKitWebView *view, GParamSpec *pspec, Client *c) {
 	case WEBKIT_LOAD_FINISHED:
 		c->progress = 0;
 		update(c);
-    printf("\nURL: %s\n",geturi(c));
     save_to_history(geturi(c));
 		break;
 	default:
