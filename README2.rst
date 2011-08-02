@@ -1,5 +1,5 @@
 My Changes on Surf
-====================================================================
+==================
 
 
 
@@ -38,8 +38,8 @@ Faforited Sites
 
 
 
-Original Readme: surf - simple webkit-based browser
-===================================================
+surf - simple webkit-based browser
+==================================
 surf is a simple Web browser based on WebKit/GTK+.
 
 
@@ -48,3 +48,23 @@ Requirements
 In order to build surf you need GTK+ and Webkit/GTK+ header files.
 
 
+Requirements
+~~~~~~~~~~~~
+In order to build surf you need GTK+ and Webkit/GTK+ header files.
+
+
+Installation
+~~~~~~~~~~~~
+Edit config.mk to match your local setup (surf is installed into
+the /usr/local namespace by default).
+
+Afterwards enter the following command to build and install surf (if
+necessary as root):
+
+    make clean install
+
+
+Running surf
+~~~~~~~~~~~~
+run
+        surf [URL]
