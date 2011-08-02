@@ -1,11 +1,40 @@
 My Changes on Surf
 ==================
 
-A screamingly fast, ultra-lightweight asynchronous WSGI_ server for CPython,
-written in C using Marc Lehmann's high performance libev_ event loop and
-Ryan Dahl's http-parser_.
+History
+~~~~~~~
 
-Why It's Cool
+* logs the every inputed and folowed url
+* logs the date and time
+* history file easy to use for scripting
+* format: <date>::<url>
+
+
+Bookmarks
+~~~~~~~~~
+
+* creates groubs by using dmenu
+* bokkmark file easy to use for scripting
+* format: <date>::<group>::url
+* standart shortcut: MOD + B
+
+
+Google Search
+~~~~~~~~~~~~~
+
+* works just like the url input
+* standart shortcut: MOD + S
+
+
+Faforited Sites
+~~~~~~~~~~~~~~~
+
+* shortcuts for faforited websites
+* configurable in congif.h
+* shortcut: MOD + 0..9
+
+
+
 ~~~~~~~~~~~~~
 bjoern is the *fastest*, *smallest* and *most lightweight* WSGI server out there,
 featuring
