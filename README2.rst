@@ -21,6 +21,21 @@ Bookmarks
 * standart shortcut: MOD + B
 
 
+Google Search
+~~~~~~~~~~~~~
+
+* works just like the url input
+* standart shortcut: MOD + S
+
+
+Faforited Sites
+~~~~~~~~~~~~~~~
+
+* shortcuts for faforited websites
+* configurable in congif.h
+* shortcut: MOD + 0..9
+
+
 Why It's Cool
 ~~~~~~~~~~~~~
 bjoern is the *fastest*, *smallest* and *most lightweight* WSGI server out there,
