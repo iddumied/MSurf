@@ -6,7 +6,7 @@ My Changes on Surf
 History
 ~~~~~~~
 
-* logs the every inputed and folowed url
+* logs every inputed and folowed url
 * logs the date and time
 * history file easy to use for scripting
 * format: <date>::<url>
@@ -16,7 +16,7 @@ Bookmarks
 ~~~~~~~~~
 
 * creates groubs by using dmenu
-* bokkmark file easy to use for scripting
+* bookmark file easy to use for scripting
 * format: <date>::<group>::url
 * standart shortcut: MOD + B
 
