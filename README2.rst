@@ -2,6 +2,17 @@ My Changes on Surf
 ====================================================================
 
 
+
+History
+~~~~~~~
+
+* logs the every inputed and folowed url
+* logs the date and time
+* history file easy to use for scripting
+* format: <date>::<url>
+
+
+
 Why It's Cool
 ~~~~~~~~~~~~~
 bjoern is the *fastest*, *smallest* and *most lightweight* WSGI server out there,
