@@ -12,6 +12,14 @@ History
 * format: <date>::<url>
 
 
+Bookmarks
+~~~~~~~~~
+
+* creates groubs by using dmenu
+* bokkmark file easy to use for scripting
+* format: <date>::<group>::url
+* standart shortcut: MOD + B
+
 
 Why It's Cool
 ~~~~~~~~~~~~~
