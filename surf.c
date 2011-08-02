@@ -64,6 +64,7 @@ static gboolean showxid = FALSE;
 static char winid[64];
 static char *progname;
 static gboolean loadimage = 1, plugin = 1, script = 1;
+static Bool searched;
 
 static char *buildpath(const char *path);
 static void cleanup(void);
@@ -380,7 +381,8 @@ loadstatuschange(WebKitWebView *view, GParamSpec *pspec, Client *c) {
 	case WEBKIT_LOAD_FINISHED:
 		c->progress = 0;
 		update(c);
-    save_to_history(geturi(c));
+    if(searched) searched = False;
+    else save_to_history(geturi(c));
 		break;
 	default:
 		break;
@@ -601,9 +603,10 @@ processx(GdkXEvent *e, GdkEvent *event, gpointer d) {
 				return GDK_FILTER_REMOVE;
 			}
       else if(ev->atom == atoms[AtomSearch]){
-        
-        printf("\nAtom Search\n");
-        
+        arg.v = g_strdup_printf("http://www.google.de/search?q=%s",getatom(c, AtomSearch));
+        loaduri(c, &arg);
+        save_to_history((char*)arg.v); 
+        searched = True;
 				return GDK_FILTER_REMOVE;
       }
       else if(ev->atom == atoms[AtomBookmark]){

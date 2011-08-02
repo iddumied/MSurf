@@ -2,17 +2,16 @@ void save_to_history(char *uri);
 
 void save_to_history(char *uri)
 {
-  char curdate[25], *line;
-  line = (char*)malloc(sizeof(char) * (strlen(uri) + 40));
+  char curdate[25];
   time_t t = time(NULL);
   struct tm *ts = localtime(&t);
 
   strftime(curdate, 80, "%d:%m:%Y:%H:%M:%S", ts);
-  sprintf(line,"%s::%s\n",curdate, uri);
 
   FILE *f;
   f = fopen(historyfile, "a+");
-  fprintf(f, line);
+  fprintf(f, curdate);
+  fprintf(f, uri);
+  fprintf(f, "\n");
   fclose(f);
-  free(line);
 }
