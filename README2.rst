@@ -35,3 +35,11 @@ Faforited Sites
 * configurable in congif.h
 * shortcut: MOD + 0..9
 
+
+
+
+Original Readme: surf - simple webkit-based browser
+===================================================
+surf is a simple Web browser based on WebKit/GTK+.
+
+
