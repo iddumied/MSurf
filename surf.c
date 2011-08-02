@@ -19,11 +19,12 @@
 #include <glib/gstdio.h>
 #include <JavaScriptCore/JavaScript.h>
 #include <sys/file.h>
+#include <time.h>
 
 #define LENGTH(x)               (sizeof x / sizeof x[0])
 #define CLEANMASK(mask)         (mask & ~(GDK_MOD2_MASK))
 
-enum { AtomFind, AtomGo, AtomUri, AtomLast };
+enum { AtomFind, AtomGo, AtomUri, AtomSearch, AtomBookmark, AtomLast };
 
 typedef union Arg Arg;
 union Arg {
@@ -110,11 +111,12 @@ static void updatewinid(Client *c);
 static void usage(void);
 static void windowobjectcleared(GtkWidget *w, WebKitWebFrame *frame, JSContextRef js, JSObjectRef win, Client *c);
 static void zoom(Client *c, const Arg *arg);
+void set_bookmark(Client *c, const Arg *arg);
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
 #include "history.c"
-
+#include "bookmark.c"
 
 char *
 buildpath(const char *path) {
@@ -143,6 +145,7 @@ cleanup(void) {
 		destroyclient(clients);
 	g_free(cookiefile);
   g_free(historyfile);
+  g_free(bookmarkfile);
 	g_free(scriptfile);
 	g_free(stylefile);
 }
@@ -597,6 +600,17 @@ processx(GdkXEvent *e, GdkEvent *event, gpointer d) {
 				loaduri(c, &arg);
 				return GDK_FILTER_REMOVE;
 			}
+      else if(ev->atom == atoms[AtomSearch]){
+        
+        printf("\nAtom Search\n");
+        
+				return GDK_FILTER_REMOVE;
+      }
+      else if(ev->atom == atoms[AtomBookmark]){
+				arg.v = getatom(c, AtomBookmark);
+        set_bookmark(c, &arg);
+				return GDK_FILTER_REMOVE;
+      }
 		}
 	}
 	return GDK_FILTER_CONTINUE;
@@ -690,10 +704,13 @@ setup(void) {
 	atoms[AtomFind] = XInternAtom(dpy, "_SURF_FIND", False);
 	atoms[AtomGo] = XInternAtom(dpy, "_SURF_GO", False);
 	atoms[AtomUri] = XInternAtom(dpy, "_SURF_URI", False);
+	atoms[AtomSearch] = XInternAtom(dpy, "_SURF_SEARCH", False);
+	atoms[AtomBookmark] = XInternAtom(dpy, "_SURF_BOOKMARK", False);
 
 	/* dirs and files */
 	cookiefile = buildpath(cookiefile);
   historyfile = buildpath(historyfile);
+  bookmarkfile = buildpath(bookmarkfile);
 	scriptfile = buildpath(scriptfile);
 	stylefile = buildpath(stylefile);
 
