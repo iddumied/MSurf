@@ -28,10 +28,10 @@ Google Search
 * standart shortcut: MOD + S
 
 
-Faforited Sites
+Favourited Sites
 ~~~~~~~~~~~~~~~
 
-* shortcuts for faforited websites
+* shortcuts for favourited websites
 * configurable in congif.h
 * shortcut: MOD + 0..9
 
