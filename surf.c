@@ -382,29 +382,7 @@ loadstatuschange(WebKitWebView *view, GParamSpec *pspec, Client *c) {
 		c->progress = 0;
 		update(c);
     if(searched) searched = False;
-    else save_to_history(geturi(c));
-    const gchar *icon  = webkit_web_view_get_icon_uri(c->view);
-    const gchar *title = webkit_web_view_get_title(c->view);
-    printf("\n\ntitle: %s\n\n", (char*)title);
-    if(*icon != NULL){
-      printf("icon: %s\n",(char*)icon);
-      WebKitNetworkRequest *request = webkit_network_request_new(icon);
-      printf("\n\n network request uri: %s\n", (char*)webkit_network_request_get_uri(request));
-      WebKitDownload *download = webkit_download_new(request);
-
-      char filename[500];
-      sprintf(filename,"/home/chief/.surf/.history/.icons/%s.ico",(char*)title);
-
-
-      const gchar *desturl = g_filename_to_uri(filename, NULL, NULL);
-      webkit_download_set_destination_uri(download, desturl);
-      printf("\n download url: %s\n", webkit_download_get_uri(download));
-      printf("\n destination url: %s\n",  webkit_download_get_destination_uri(download));
-      webkit_download_start(download);
-      
-//      const gchar *name = webkit_download_get_suggested_filename(download);
-//      printf("\nname: %s\n", (char*)name);
-    }
+    else save_to_history(c);
 		break;
 	default:
 		break;
