@@ -1,5 +1,6 @@
 void save_to_history(Client *c);
 Bool existFile(const char *fname);
+void setup_home_path();
 
 
 void save_to_history(Client *c)
@@ -11,13 +12,13 @@ void save_to_history(Client *c)
     WebKitDownload *download = webkit_download_new(request);
 
     char filename[500];
-    sprintf(filename,"/home/chief/.surf/.history/.icons/%s.ico",(char*)title);
+    sprintf(filename,"%s/.surf/.history/.icons/%s.ico", home_path, (char*)title);
 
     if(!existFile(filename)){
       const gchar *desturl = g_filename_to_uri(filename, NULL, NULL);
       webkit_download_set_destination_uri(download, desturl);
       webkit_download_start(download);
-    }else printf("\nFile exist\n");
+    }
   }
 
   char curdate[25], *uri = geturi(c);
@@ -46,4 +47,25 @@ Bool existFile(const char *fname)
     } 
 }
 
+void setup_home_path()
+{
+  FILE *fp;
+  char *line = NULL;
+  size_t len = 0;
+  ssize_t read;
+  int i;
+  fp = popen("echo $HOME","r");
+  
+   if((read = getline(&line,&len,fp)) != -1){
+     home_path = (char*)malloc(sizeof(char)*len);
+     for(i = 0;i < len;i++){
+       if(line[i] == '\n'){
+         home_path[i] = '\x00';
+         break;
+       }
+       home_path[i] = line[i];
+     }
+   }
 
+  fclose(fp);
+}

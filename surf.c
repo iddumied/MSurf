@@ -65,6 +65,7 @@ static char winid[64];
 static char *progname;
 static gboolean loadimage = 1, plugin = 1, script = 1;
 static Bool searched;
+static char *home_path;
 
 static char *buildpath(const char *path);
 static void cleanup(void);
@@ -732,6 +733,8 @@ setup(void) {
 		soup_uri_free(puri);
 		g_free(new_proxy);
 	}
+  
+  setup_home_path();
 }
 
 void
