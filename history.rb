@@ -1,8 +1,12 @@
- require 'mechanize'
+class String
+  def join
+    return self
+  end
+end
 
 class History
   def initialize file
-    @file = file.each_line.to_a.reverse
+    @file = file.each_line.to_a.reverse.map{|e| e.chop}
     @history = [] 
     Dir.mkdir("#{`echo $HOME`.chop}/.surf") unless Dir.exist?("#{`echo $HOME`.chop}/.surf")
     Dir.mkdir("#{`echo $HOME`.chop}/.surf/.history") unless Dir.exist?("#{`echo $HOME`.chop}/.surf/.history")
@@ -18,21 +22,15 @@ class History
          e = e.to_i
          date.store( [:day,:month,:year,:hour,:minute,:second].at(i), e )
       end
-
-      @history << { :date => date, :url => line.split("::").last }
+      
+      title = line.split("::")
+      title.delete_at(0)
+      title.delete_at(title.length-1)
+      title = title.join
+      
+      @history << { :date => date, :url => line.split("::").last, :title => title }
     end
       
-  end
-
-  def get_info
-    unless @info.nil?
-      #read info file
-    end
-    @history.each do |entry|
-      page = @agent.get( entry[:url] )
-      puts page.methods.inspect
-      sleep 25
-    end
   end
 
   def debug
