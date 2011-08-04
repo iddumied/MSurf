@@ -8,16 +8,19 @@ History
 
 * logs every inputed and folowed url
 * logs the date and time
+* logs the Title and saves the icon of the page
+* icons ar saved like: <page title>.ico
 * history file easy to use for scripting
-* format: <date>::<url>
+* format: <date>::<title>::<url>
 
 
 Bookmarks
 ~~~~~~~~~
 
 * creates groubs by using dmenu
+* logs the title of the website
 * bookmark file easy to use for scripting
-* format: <date>::<group>::url
+* format: <date>::<group>::<title>::<url>
 * standart shortcut: MOD + B
 
 
