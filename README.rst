@@ -12,6 +12,7 @@ History
 * icons ar saved like: <page title>.ico
 * history file easy to use for scripting
 * format: <date>::<title>::<url>
+* history are use in dmenu by url input
 
 
 Bookmarks
@@ -22,12 +23,16 @@ Bookmarks
 * bookmark file easy to use for scripting
 * format: <date>::<group>::<title>::<url>
 * standart shortcut: MOD + B
+* bookmarkgroups are used in dmenu by bookmark input
 
 
 Google Search
 ~~~~~~~~~~~~~
 
 * works just like the url input
+* log file with date
+* formate: <date>::<serach>
+* log file used by dmenu input
 * standart shortcut: MOD + S
 
 
