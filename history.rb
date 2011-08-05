@@ -6,16 +6,16 @@ end
 
 
 class History
-  def initialize file
+  def initialize file#/*{{{*/
     @file = file.each_line.to_a.reverse.map{|e| e.chop}
     @history = [] 
     Dir.mkdir("#{`echo $HOME`.chop}/.surf") unless Dir.exist?("#{`echo $HOME`.chop}/.surf")
     Dir.mkdir("#{`echo $HOME`.chop}/.surf/.history") unless Dir.exist?("#{`echo $HOME`.chop}/.surf/.history")
 
     @curdate = { :year => Time.now.year, :month => Time.now.month, :day => Time.now.day, :hour => Time.now.hour, :minute => Time.now.min, :second => Time.now.sec } 
-  end
+  end#/*}}}*/
   
-  def parse
+  def parse#/*{{{*/
     @file.each do |line|
       date = Hash.new
       line.split("::").first.split(":").each_with_index do |e,i| 
@@ -30,9 +30,9 @@ class History
       
       @history << { :date => date, :url => line.split("::").last, :title => title }
     end
-  end
+  end#/*}}}*/
 
-  def group_by_date
+  def group_by_date#/*{{{*/
     history_ary = @history
     @history = { :today => [], :yesterday => [], :lastweek => [], :lastmonth => [], :lastyear => [], :lastyears => [] }
     
@@ -42,15 +42,15 @@ class History
     @history[:lasmonth]  << history_ary.delete_at(0) until history_ary.empty? or time_div( history_ary.first[:date], @curdate )[:month] == 1
     @history[:lastyear]  << history_ary.delete_at(0) until history_ary.empty? or time_div( history_ary.first[:date], @curdate )[:year]  == 1
     @history[:lastyears] << history_ary.delete_at(0) until history_ary.empty?
-  end
+  end#/*}}}*/
 
-  def debug
+  def debug#/*{{{*/
     @history.each do |e|
-      puts e.inspect
+     e.each do |f| puts f.inspect +  "\n\n" end 
     end
-  end
+  end#/*}}}*/
 
-  def time_div start, ende
+  def time_div start, ende#/*{{{*/
     div = Hash.new
 
     ende.each { |k,v| div[k] = v - start[k] }
@@ -62,6 +62,33 @@ class History
     div[:year]   -= 1 if div[:month]  < 0
       
     return div
+  end#/*}}}*/
+
+  def to_html
+    html = File.new("#{`echo $HOME`.chop}/.surf/.history/history.html","w")
+    setup_html(html)
+    @history.each do |key,value|
+      html.puts "<p class=\"caption\">#{key.to_s}</p>"
+      value.each do |entry|
+        unless [:today, :yesterday].include? key then date = sprintf("%02d.%02d.%d - %02d:%02d", entry[:date][:day], entry[:date][:month], entry[:date][:year], entry[:date][:hour], entry[:date][:minute]) 
+        else date = sprintf("%02d:%02d", entry[:date][:hour], entry[:date][:minute]) end
+        html.puts "<p class=\"entry\">&nbsp;&nbsp;&nbsp;&nbsp;#{date}</p>"
+      end
+    end
+  end
+
+  def setup_html( html )
+    html.puts "<html><head><title>History</title>"
+    html.puts "<style type=\"text/css\">"
+    html.puts ".caption {"
+    html.puts "  font-size: 22px;"
+    html.puts "  font-weight: bold;"
+    html.puts "}"
+    html.puts ".entry {"
+    html.puts "  font-size: 12px;"
+    html.puts "  line-height: 30%;"
+    html.puts "}"
+    html.puts "</style>"
   end
 
 end
@@ -70,5 +97,5 @@ if __FILE__ == $0
   history = History.new( File.open("#{`echo $HOME`.chop}/.surf/history.txt", :encoding => "BINARY") )
   history.parse
   history.group_by_date
-  history.debug
+  history.to_html
 end
