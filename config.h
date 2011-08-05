@@ -7,20 +7,38 @@ static char *scriptfile     = ".surf/script.js";
 static char *cookiefile     = ".surf/cookies.txt";
 static char *historyfile    = ".surf/history.txt";
 static char *bookmarkfile   = ".surf/bookmark.txt";
+static char *searchfile     = ".surf/searchhistory.txt";
 static time_t sessiontime   = 3600;
 #define NOBACKGROUND 0
-
 #define SETPROP(p, q)     { .v = (char *[]){ "/bin/sh", "-c", \
 	"prop=\"`xprop -id $2 $0 | cut -d '\"' -f 2 | dmenu -fn \"-artwiz-cureextra-medium-r-normal--11-110-75-75-p-90-iso8859-1\" -sb \"#000000\" -nb \"#000000\" -nf \"#ffffff\" -sf \"#00aaff\"`\" &&" \
 	"xprop -id $2 -f $1 8s -set $1 \"$prop\"", \
 	p, q, winid, NULL } }
+
+#define URLOPEN(p, q)     { .v = (char *[]){ "/bin/sh", "-c", \
+	"prop=\"`cat ~/.surf/history.txt | cut -d '/' -f 3 | dmenu -fn \"-artwiz-cureextra-medium-r-normal--11-110-75-75-p-90-iso8859-1\" -sb \"#000000\" -nb \"#000000\" -nf \"#ffffff\" -sf \"#00aaff\"`\" &&" \
+	"xprop -id $2 -f $1 8s -set $1 \"$prop\"", \
+	p, q, winid, NULL } }
+
+#define SEARCH(p, q)     { .v = (char *[]){ "/bin/sh", "-c", \
+	"prop=\"`cat ~/.surf/searchhistory.txt | cut -d ':' -f 8 | dmenu -fn \"-artwiz-cureextra-medium-r-normal--11-110-75-75-p-90-iso8859-1\" -sb \"#000000\" -nb \"#000000\" -nf \"#ffffff\" -sf \"#00aaff\"`\" &&" \
+	"xprop -id $2 -f $1 8s -set $1 \"$prop\"", \
+	p, q, winid, NULL } }
+
+#define BOOKMARK(p, q)     { .v = (char *[]){ "/bin/sh", "-c", \
+	"prop=\"`cat ~/.surf/bookmark.txt | cut -d ':' -f 8 | dmenu -fn \"-artwiz-cureextra-medium-r-normal--11-110-75-75-p-90-iso8859-1\" -sb \"#000000\" -nb \"#000000\" -nf \"#ffffff\" -sf \"#00aaff\"`\" &&" \
+	"xprop -id $2 -f $1 8s -set $1 \"$prop\"", \
+	p, q, winid, NULL } }
+
 #define DOWNLOAD(d) { \
 	.v = (char *[]){ "/bin/sh", "-c", \
 	"xterm -e \"wget --load-cookies ~/.surf/cookies.txt '$0';\"", \
 	d, NULL } }
+
 #define OPEN(w)     { .v = (char *[]){ "/bin/sh", "-c", \
 	"xprop -id $0 -f _SURF_GO 8s -set _SURF_GO $1", \
 	winid, w, NULL } }
+
 #define MODKEY GDK_CONTROL_MASK
 static Key keys[] = {
     /* modifier	             keyval         function      arg             Focus */
@@ -36,15 +54,16 @@ static Key keys[] = {
     { MODKEY,                GDK_0,         zoom,         { .i = 0  } },
     { MODKEY,                GDK_Right,     navigate,     { .i = +1 } },
     { MODKEY,                GDK_BackSpace, navigate,     { .i = -1 } },
+//    { 0,                     Button1,       navigate,     { .i = -1 } },
     { MODKEY,                GDK_Left,      navigate,     { .i = -1 } },
-    { 0,                     GDK_Down,      scroll,       { .i = +1 } },
-    { 0,                     GDK_Up,        scroll,       { .i = -1 } },
+    { MODKEY,                GDK_Down,      scroll,       { .i = +1 } },
+    { MODKEY,                GDK_Up,        scroll,       { .i = -1 } },
     { 0,                     GDK_Escape,    stop,         { 0 } },
     { MODKEY,                GDK_o,         source,       { 0 } },
-    { MODKEY,                GDK_d,         spawn,        SETPROP("_SURF_URI", "_SURF_GO") },
-    { MODKEY,                GDK_s,         spawn,        SETPROP("_SURF_SEARCH", "_SURF_SEARCH") },
+    { MODKEY,                GDK_d,         spawn,        URLOPEN("_SURF_URI", "_SURF_GO") },
+    { MODKEY,                GDK_s,         spawn,        SEARCH("_SURF_SEARCH", "_SURF_SEARCH") },
     { MODKEY,                GDK_f,         spawn,        SETPROP("_SURF_FIND", "_SURF_FIND") },
-    { MODKEY,                GDK_b,         spawn,        SETPROP("_SURF_BOOKMARK", "_SURF_BOOKMARK") },
+    { MODKEY,                GDK_b,         spawn,        BOOKMARK("_SURF_BOOKMARK", "_SURF_BOOKMARK") },
     { MODKEY,                GDK_n,         find,         { .b = TRUE } },
     { MODKEY|GDK_SHIFT_MASK, GDK_n,         find,         { .b = FALSE } },
     { MODKEY,                GDK_1,         spawn,        OPEN("www.github.com") },
@@ -52,4 +71,6 @@ static Key keys[] = {
     { MODKEY,                GDK_3,         spawn,        OPEN("www.kwick.de/login") },
     { MODKEY,                GDK_4,         spawn,        OPEN("www.archlinux.de") },
     { MODKEY,                GDK_5,         spawn,        OPEN("webmailer.1und1.de") },
+    { MODKEY,                GDK_6,         spawn,        OPEN("www.google.de") },
+    { MODKEY,                GDK_7,         spawn,        OPEN("www.css4you.de") },
 };

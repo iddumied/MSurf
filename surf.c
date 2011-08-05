@@ -119,6 +119,7 @@ void set_bookmark(Client *c, const Arg *arg);
 #include "config.h"
 #include "history.c"
 #include "bookmark.c"
+#include "search.c"
 
 char *
 buildpath(const char *path) {
@@ -147,6 +148,7 @@ cleanup(void) {
 		destroyclient(clients);
 	g_free(cookiefile);
   g_free(historyfile);
+  g_free(searchfile);
   g_free(bookmarkfile);
 	g_free(scriptfile);
 	g_free(stylefile);
@@ -604,9 +606,11 @@ processx(GdkXEvent *e, GdkEvent *event, gpointer d) {
 				return GDK_FILTER_REMOVE;
 			}
       else if(ev->atom == atoms[AtomSearch]){
-        arg.v = g_strdup_printf("http://www.google.de/search?q=%s",getatom(c, AtomSearch));
+        char *search = getatom(c, AtomSearch);
+        arg.v = g_strdup_printf("http://www.google.de/search?q=%s", search);
         loaduri(c, &arg);
-        save_to_history((char*)arg.v); 
+        save_to_history(c); 
+        save_to_search_history(search);
         searched = True;
 				return GDK_FILTER_REMOVE;
       }
@@ -714,6 +718,7 @@ setup(void) {
 	/* dirs and files */
 	cookiefile = buildpath(cookiefile);
   historyfile = buildpath(historyfile);
+  searchfile = buildpath(searchfile);
   bookmarkfile = buildpath(bookmarkfile);
 	scriptfile = buildpath(scriptfile);
 	stylefile = buildpath(stylefile);
