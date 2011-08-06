@@ -8,10 +8,10 @@ end
 class History
   def initialize file#/*{{{*/
     @file = file.each_line.to_a.reverse.map{|e| e.chop}
-    @history = [] 
-    Dir.mkdir("#{`echo $HOME`.chop}/.surf") unless Dir.exist?("#{`echo $HOME`.chop}/.surf")
-    Dir.mkdir("#{`echo $HOME`.chop}/.surf/.history") unless Dir.exist?("#{`echo $HOME`.chop}/.surf/.history")
-
+    @history, @home = [],`echo $HOME`.chop
+    Dir.mkdir("#{@home}/.surf") unless Dir.exist?("#{@home}/.surf")
+    Dir.mkdir("#{@home}/.surf/.history") unless Dir.exist?("#{@home}/.surf/.history")
+    
     @curdate = { :year => Time.now.year, :month => Time.now.month, :day => Time.now.day, :hour => Time.now.hour, :minute => Time.now.min, :second => Time.now.sec } 
   end#/*}}}*/
   
@@ -64,20 +64,23 @@ class History
     return div
   end#/*}}}*/
 
-  def to_html
-    html = File.new("#{`echo $HOME`.chop}/.surf/.history/history.html","w")
+  def to_html#/*{{{*/
+    html = File.new("#{@home}/.surf/.history/history.html","w")
     setup_html(html)
     @history.each do |key,value|
       html.puts "<p class=\"caption\">#{key.to_s}</p>"
       value.each do |entry|
         unless [:today, :yesterday].include? key then date = sprintf("%02d.%02d.%d - %02d:%02d", entry[:date][:day], entry[:date][:month], entry[:date][:year], entry[:date][:hour], entry[:date][:minute]) 
         else date = sprintf("%02d:%02d", entry[:date][:hour], entry[:date][:minute]) end
-        html.puts "<p class=\"entry\">&nbsp;&nbsp;&nbsp;&nbsp;#{date}</p>"
+
+        html.puts "  <p class=\"entry\">&nbsp;&nbsp;&nbsp;&nbsp;<img src=\"#{@home}/.surf/.history/.icons/#{entry[:title]}.ico\" height=\"16px\" width=\"16px\" /> #{date} "
+        html.puts "    <a href=\"#{entry[:url]}\" target=\"_blank\">#{entry[:title]}</a>"
+        html.puts "  </p>"
       end
     end
-  end
+  end#/*}}}*/
 
-  def setup_html( html )
+  def setup_html( html )#/*{{{*/
     html.puts "<html><head><title>History</title>"
     html.puts "<style type=\"text/css\">"
     html.puts ".caption {"
@@ -89,13 +92,27 @@ class History
     html.puts "  line-height: 30%;"
     html.puts "}"
     html.puts "</style>"
+  end#/*}}}*/
+
+  def filter arg
+    @history.each do |k,v|
+      v.map! do |hash|
+        if hash[:url].include? arg or hash[:title].include? arg
+          hash
+        else nil end
+      end
+      v.delete( nil )
+    end  
   end
 
 end
 
 if __FILE__ == $0
+  input = `echo \"Search History\"| dmenu -fn \"-artwiz-cureextra-medium-r-normal--11-110-75-75-p-90-iso8859-1\" -sb \"#000000\" -nb \"#000000\" -nf \"#ffffff\" -sf \"#00aaff\"`.chop
   history = History.new( File.open("#{`echo $HOME`.chop}/.surf/history.txt", :encoding => "BINARY") )
   history.parse
   history.group_by_date
+  history.filter( input ) unless input == "Search History"
   history.to_html
+  system "xprop -id #{ARGV[0]} -f _SURF_GO 8s -set _SURF_GO file://#{`echo $HOME`.chop}/.surf/.history/history.html"
 end
