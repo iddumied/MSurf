@@ -82,6 +82,7 @@ class History
 
   def setup_html( html )#/*{{{*/
     html.puts "<html><head><title>History</title>"
+    html.puts "<link rel=\"icon\" href=\"history.ico\" type=\"image/ico\" />"
     html.puts "<style type=\"text/css\">"
     html.puts ".caption {"
     html.puts "  font-size: 22px;"
