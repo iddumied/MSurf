@@ -39,7 +39,7 @@ class History
     @history[:today]     << history_ary.delete_at(0) until history_ary.empty? or time_div( history_ary.first[:date], @curdate )[:day]   == 1 
     @history[:yesterday] << history_ary.delete_at(0) until history_ary.empty? or time_div( history_ary.first[:date], @curdate )[:day]   == 2
     @history[:lastweek]  << history_ary.delete_at(0) until history_ary.empty? or time_div( history_ary.first[:date], @curdate )[:day]   == 7
-    @history[:lasmonth]  << history_ary.delete_at(0) until history_ary.empty? or time_div( history_ary.first[:date], @curdate )[:month] == 1
+    @history[:lastmonth]  << history_ary.delete_at(0) until history_ary.empty? or time_div( history_ary.first[:date], @curdate )[:month] == 1
     @history[:lastyear]  << history_ary.delete_at(0) until history_ary.empty? or time_div( history_ary.first[:date], @curdate )[:year]  == 1
     @history[:lastyears] << history_ary.delete_at(0) until history_ary.empty?
   end#/*}}}*/
