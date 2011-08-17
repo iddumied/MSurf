@@ -30,9 +30,17 @@ static time_t sessiontime   = 3600;
 	"xprop -id $2 -f $1 8s -set $1 \"$prop\"", \
 	p, q, winid, NULL } }
 
+#define HISTORY     { .v = (char *[]){ "/bin/sh", "-c", "ruby $HOME/surf/history.rb $0 ", \
+	winid, NULL } }
+/*
 #define DOWNLOAD(d) { \
 	.v = (char *[]){ "/bin/sh", "-c", \
 	"xterm -e \"wget --load-cookies ~/.surf/cookies.txt '$0';\"", \
+	d, NULL } }
+*/
+#define DOWNLOAD(d) { \
+	.v = (char *[]){ "/bin/sh", "-c", \
+	"xterm -bc -fn \"-nsb-lokaltog-medium-r-normal--10-100-75-75-c-60-iso10646-1\" -bg \"#000000\" -cr \"#00aaff\" -fg \"#00aaff\" -e \"ruby ~/surf/download.rb '$0';\"", \
 	d, NULL } }
 
 #define OPEN(w)     { .v = (char *[]){ "/bin/sh", "-c", \
@@ -64,6 +72,7 @@ static Key keys[] = {
     { MODKEY,                GDK_s,         spawn,        SEARCH("_SURF_SEARCH", "_SURF_SEARCH") },
     { MODKEY,                GDK_f,         spawn,        SETPROP("_SURF_FIND", "_SURF_FIND") },
     { MODKEY,                GDK_b,         spawn,        BOOKMARK("_SURF_BOOKMARK", "_SURF_BOOKMARK") },
+    { MODKEY,                GDK_h,         spawn,        HISTORY },
     { MODKEY,                GDK_n,         find,         { .b = TRUE } },
     { MODKEY|GDK_SHIFT_MASK, GDK_n,         find,         { .b = FALSE } },
     { MODKEY,                GDK_1,         spawn,        OPEN("www.github.com") },
