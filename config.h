@@ -32,6 +32,9 @@ static time_t sessiontime   = 3600;
 
 #define HISTORY     { .v = (char *[]){ "/bin/sh", "-c", "ruby $HOME/surf/history.rb $0 ", \
 	winid, NULL } }
+
+#define BOOKMARKS     { .v = (char *[]){ "/bin/sh", "-c", "ruby $HOME/surf/bookmark.rb $0 ", \
+	winid, NULL } }
 /*
 #define DOWNLOAD(d) { \
 	.v = (char *[]){ "/bin/sh", "-c", \
@@ -73,6 +76,7 @@ static Key keys[] = {
     { MODKEY,                GDK_f,         spawn,        SETPROP("_SURF_FIND", "_SURF_FIND") },
     { MODKEY,                GDK_b,         spawn,        BOOKMARK("_SURF_BOOKMARK", "_SURF_BOOKMARK") },
     { MODKEY,                GDK_h,         spawn,        HISTORY },
+    { MODKEY|GDK_SHIFT_MASK, GDK_b,         spawn,        BOOKMARKS },
     { MODKEY,                GDK_n,         find,         { .b = TRUE } },
     { MODKEY|GDK_SHIFT_MASK, GDK_n,         find,         { .b = FALSE } },
     { MODKEY,                GDK_1,         spawn,        OPEN("www.github.com") },
