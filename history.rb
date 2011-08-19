@@ -103,6 +103,7 @@ class History
         else nil end
       end
       v.delete( nil )
+      @history.delete(k) if v.empty?
     end  
   end
 
