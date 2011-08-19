@@ -11,7 +11,7 @@ void save_to_history(Client *c)
     WebKitNetworkRequest *request = webkit_network_request_new(icon);
     WebKitDownload *download = webkit_download_new(request);
 
-    char filename[500];
+    char filename[2000];
     sprintf(filename,"%s/.surf/.history/.icons/%s.ico", home_path, (char*)title);
 
     if(!existFile(filename)){
@@ -21,7 +21,7 @@ void save_to_history(Client *c)
     }
   }
 
-  char curdate[25], *uri = geturi(c);
+  char curdate[80], *uri = geturi(c);
   time_t t = time(NULL);
   struct tm *ts = localtime(&t);
 
@@ -32,6 +32,7 @@ void save_to_history(Client *c)
   fprintf(f, curdate);
   fprintf(f, (char*)title);
   fprintf(f, "::");
+  printf("\nOpend url: %s\n",uri);
   fprintf(f, uri);
   fprintf(f, "\n");
   fclose(f);
