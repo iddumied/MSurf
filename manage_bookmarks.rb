@@ -15,7 +15,7 @@ class Bookmark
     Dir.mkdir("#{@home}/.surf/.bookmark") unless Dir.exist?("#{@home}/.surf/.bookmark")
     
     @curdate = { :year => Time.now.year, :month => Time.now.month, :day => Time.now.day, :hour => Time.now.hour, :minute => Time.now.min, :second => Time.now.sec } 
-    @historyb, @historyf = {},{}
+    @historyb, @historyf = [],[]
   end
   
   def parse
@@ -56,10 +56,10 @@ class Bookmark
   def list(pgroub = true, url = false)
     length = Curses.init_screen.maxx
     Curses.close_screen
-    i = 0
 
     @bookmark.each do |groub,elemnts|
       if pgroub == true or pgroub == groub
+        i = @groubs.find_index(groub)
         puts "(#{i}) #{groub}"
         elemnts.each_with_index do |e,i| 
           output = "  #{i}: #{e[:title]}#{ url ? "  -  #{e[:url]}" : ""}"
@@ -77,14 +77,51 @@ class Bookmark
 
   # parameter surce groub, surce element, targte groub
   def shift sg, se, tg
-    @historyf = {}
+    @historyf = []
     output = "#{@groubs[sg]}: #{@bookmark[@groubs[sg]][se][:title]} => #{@groubs[tg]}"
 
-    @historyb.store(output, @bookmark.clone)
+    @historyb << { output => clone }
     
     @bookmark[@groubs[tg]] << @bookmark[@groubs[sg]].delete_at(se)
     
     puts output
+  end
+
+  def clone bookmark = @bookmark
+    cl = Hash.new
+    bookmark.each do |groub,ary|
+      cl.store(groub, Array.new)
+      ary.each do |hash|
+        cl[groub] << Hash.new
+        hash.each do |k,v|
+          cl[groub][cl[groub].length-1].store(k,v.clone)
+        end
+      end
+    end
+    
+    return cl
+  end
+
+  def step_back
+    if @historyb.empty?
+      puts "Already at oldest change"
+      return false
+    end
+
+    @historyf << { @historyb.last.keys.first => clone }
+    puts "undo :: #{@historyb.last.keys.first}"    
+    @bookmark = clone( @historyb.delete_at(@historyb.length-1).values.first )
+  end
+  
+  def step_for
+    if @historyf.empty?
+      puts "Already at newest change"
+      return false
+    end
+
+    @historyb << { @historyf.last.keys.first => clone }
+    puts "redo :: #{@historyf.last.keys.first}"    
+    @bookmark = clone( @historyf.delete_at(@historyf.length-1).values.first )
   end
 
 end
@@ -129,6 +166,21 @@ if __FILE__ == $0
     elsif input.split(" ").length == 3
       input = input.split(" ").map{ |e| e.to_i }
       bookmark.shift(input[0], input[1], input[2])
+
+    elsif ["r","redo"].include? input
+      bookmark.step_for
+
+    elsif ["u","undo"].include? input
+      bookmark.step_back
+
+    elsif ["h", "help"].include? input
+      puts "ls <opt> <groub>\t\tlist groubs and etries"
+      puts "  --url --all -u -a\t\t+url"
+      puts "  <groub>\t\t\tlist onley similar groub"
+      puts "q\tquit\t\t\texit programm"
+      puts "u\tundo\t\t\tundo last change"
+      puts "r\tredo\t\t\tredo last undone change"
+      
     end
   end
 
