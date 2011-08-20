@@ -109,6 +109,7 @@ class Bookmark
 
     @historyb << { output => clone }
     
+    @bookmark[@groubs[sg]][se][:groub] = @groubs[tg].clone
     @bookmark[@groubs[tg]] << @bookmark[@groubs[sg]].delete_at(se)
     
     puts output
@@ -248,7 +249,7 @@ class Bookmark
     output = "renamed: #{@groubs[groub]} => #{name}"
     @historyb << { output => clone }
 
-    @bookmark[name] = @bookmark.delete(@groubs[groub])
+    @bookmark[name] = @bookmark.delete(@groubs[groub]).map{|hash| hash[:groub] = name; hash }
     @groubs[groub] = name
     puts output
   end

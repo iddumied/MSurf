@@ -26,9 +26,8 @@ class Bookmark
       groub = line.split("::")
       groub.delete_at(0)
       groub.delete_at(groub.length-1)
-      title = groub.last
-      groub.delete_at(groub.length-1)
-      groub = groub.join
+      title = line.sub("::","CATONTHISPOSITION").sub("::","CATONTHISPOSITION").reverse.sub("::","CATONTHISPOSITION".reverse).reverse.split("CATONTHISPOSITION")[2]
+      groub = groub.first
 
       @bookmark << { :date => date, :url => line.split("::").last, :title => title, :groub => groub }
     end
@@ -66,8 +65,8 @@ class Bookmark
   end
 
   def setup_html( html )
-    html.puts "<html><head><title>History</title>"
-    html.puts "<link rel=\"icon\" href=\"history.ico\" type=\"image/ico\" />"
+    html.puts "<html><head><title>Bookmarks</title>"
+    html.puts "<link rel=\"icon\" href=\"bookmark.ico\" type=\"image/ico\" />"
     html.puts "<style type=\"text/css\">"
     html.puts ".caption {"
     html.puts "  font-size: 22px;"

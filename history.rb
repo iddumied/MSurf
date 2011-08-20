@@ -4,7 +4,6 @@ class String
   end
 end
 
-
 class History
   def initialize file#/*{{{*/
     @file = file.each_line.to_a.reverse.map{|e| e.chop}
@@ -28,6 +27,12 @@ class History
       title.delete_at(title.length-1)
       title = title.join
       
+      if date[:day].nil? or  date[:month].nil? or date[:year].nil? or date[:hour].nil? or date[:minute].nil? or date[:second].nil?
+        puts line.inspect
+        next
+      end
+      
+
       @history << { :date => date, :url => line.split("::").last, :title => title }
     end
   end#/*}}}*/
