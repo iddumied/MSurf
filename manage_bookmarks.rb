@@ -10,20 +10,28 @@ end
 class Bookmark
   def initialize file
     @file = file.each_line.to_a.reverse.map{|e| e.chop}
-    @bookmark, @home = [],`echo $HOME`.chop
-    Dir.mkdir("#{@home}/.surf") unless Dir.exist?("#{@home}/.surf")
-    Dir.mkdir("#{@home}/.surf/.bookmark") unless Dir.exist?("#{@home}/.surf/.bookmark")
+    @bookmarks = Array.new
+    Dir.mkdir("#{ENV[ "HOME" ]}/.surf") unless Dir.exist?("#{ENV[ "HOME" ]}/.surf")
+    Dir.mkdir("#{ENV[ "HOME" ]}/.surf/.bookmark") unless Dir.exist?("#{ENV[ "HOME" ]}/.surf/.bookmark")
     
-    @curdate = { :year => Time.now.year, :month => Time.now.month, :day => Time.now.day, :hour => Time.now.hour, :minute => Time.now.min, :second => Time.now.sec } 
+    @curdate = time_now_hash
     @historyb, @historyf = {},{}
+  end
+
+  def time_now_hash
+    hash = Hash.new
+    [ :year, :month, :day, :hour, :minute, :second ].each do |sym|
+      hash[ sym ] = Time.now.__send__ sym
+    end
+    return hash
   end
   
   def parse
     @file.each do |line|
       date = Hash.new
       line.split("::").first.split(":").each_with_index do |e,i| 
-         e = e.to_i
-         date.store( [:day,:month,:year,:hour,:minute,:second].at(i), e )
+        e = e.to_i
+        date.store( [:day,:month,:year,:hour,:minute,:second].at(i), e )
       end
       
       groub = line.split("::")
@@ -33,22 +41,22 @@ class Bookmark
       groub.delete_at(groub.length-1)
       groub = groub.join
 
-      @bookmark << { :date => date, :url => line.split("::").last, :title => title, :groub => groub }
+      @bookmarks << { :date => date, :url => line.split("::").last, :title => title, :groub => groub }
     end
   end
 
   def groub
     @groubs = []
     
-    @bookmark.each { |hash| @groubs << hash[:groub] }
-    bookmark_ary = @bookmark
-    @bookmark = Hash.new
+    @bookmarks.each { |hash| @groubs << hash[:groub] }
+    bookmark_ary = @bookmarks
+    @bookmarks = Hash.new
 
-    @groubs.uniq!.each { |groub| @bookmark.store( groub, [] ) }
+    @groubs.uniq!.each { |groub| @bookmarks.store( groub, [] ) }
     
-    @bookmark.keys.each do |groub|
+    @bookmarks.keys.each do |groub|
       bookmark_ary.each do |hash|  
-        @bookmark[groub] << hash if hash[:groub] == groub 
+        @bookmarks[groub] << hash if hash[:groub] == groub 
       end
     end
   end
@@ -58,7 +66,7 @@ class Bookmark
     Curses.close_screen
     i = 0
 
-    @bookmark.each do |groub,elemnts|
+    @bookmarks.each do |groub,elemnts|
       if pgroub == true or pgroub == groub
         puts "(#{i}) #{groub}"
         elemnts.each_with_index do |e,i| 
@@ -78,11 +86,11 @@ class Bookmark
   # parameter surce groub, surce element, targte groub
   def shift sg, se, tg
     @historyf = {}
-    output = "#{@groubs[sg]}: #{@bookmark[@groubs[sg]][se][:title]} => #{@groubs[tg]}"
+    output = "#{@groubs[sg]}: #{@bookmarks[@groubs[sg]][se][:title]} => #{@groubs[tg]}"
 
-    @historyb.store(output, @bookmark.clone)
+    @historyb.store(output, @bookmarks.clone)
     
-    @bookmark[@groubs[tg]] << @bookmark[@groubs[sg]].delete_at(se)
+    @bookmarks[@groubs[tg]] << @bookmarks[@groubs[sg]].delete_at(se)
     
     puts output
   end
@@ -90,7 +98,7 @@ class Bookmark
 end
 
 if __FILE__ == $0
-  bookmark = Bookmark.new( File.open("#{`echo $HOME`.chop}/.surf/bookmark.txt", :encoding => "BINARY") )
+  bookmark = Bookmark.new( File.open("#{ENV[ "HOME" ]}/.surf/bookmark.txt", :encoding => "BINARY") )
   bookmark.parse
   bookmark.groub
   bookmark.list
@@ -99,7 +107,6 @@ if __FILE__ == $0
   loop do
     print "bookmarks ~> "
     input = gets.chop 
-
 
     if ["q", "quit"].include? input
         puts "exit.."
@@ -113,17 +120,10 @@ if __FILE__ == $0
        url = (input.include?("--url")  or input.include?("-u") or
               input.include?("-a") or input.include?("--all")) ? true : false
 
-       input.delete("--url")
-       input.delete("-u")
-       input.delete("--all")
-       input.delete("-a")
-       input.delete("ls")
-       input.delete("")
+      [ "--url", "-u", "--all", "-a", "ls" ].each { |s| input.delete( s ) }
        
-       if input.empty?
-         bookmark.list true, url
-       else
-         bookmark.list input.join, url
+       if input.empty? then bookmark.list( true, url )
+       else bookmark.list( input.join, url )
        end
       
     elsif input.split(" ").length == 3
