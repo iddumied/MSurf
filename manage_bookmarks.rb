@@ -139,6 +139,7 @@ class Bookmark
     @historyf << { @historyb.last.keys.first => clone }
     puts "undo :: #{@historyb.last.keys.first}"    
     @bookmark = clone( @historyb.delete_at(@historyb.length-1).values.first )
+    @groubs = @bookmark.keys
     @saved = false
   end
   
@@ -151,6 +152,7 @@ class Bookmark
     @historyb << { @historyf.last.keys.first => clone }
     puts "redo :: #{@historyf.last.keys.first}"    
     @bookmark = clone( @historyf.delete_at(@historyf.length-1).values.first )
+    @groubs = @bookmark.keys
     @saved = false
   end
 
@@ -236,6 +238,48 @@ class Bookmark
     return ary.delete_at(index).last
   end
 
+  def rename_groub( groub, name )
+    if groub < 0 or groub >= @groubs.length 
+      puts "There is no Groub #{groub}"    
+      return false
+    end
+
+    @historyf = []
+    output = "renamed: #{@groubs[groub]} => #{name}"
+    @historyb << { output => clone }
+
+    @bookmark[name] = @bookmark.delete(@groubs[groub])
+    @groubs[groub] = name
+    puts output
+  end
+
+  def rename_bookmark( g,e, name )
+    if g < 0 or g >= @groubs.length 
+      puts "There is no Groub #{g}"    
+      return false
+    
+    elsif @bookmark[@groubs[g]][e].nil?
+      puts "Groub #{@groubs[g]} has no entrie #{e}"
+      return false
+
+    end
+
+    @historyf = []
+    output = "renamed: #{@groubs[g]}: #{@bookmark[@groubs[g]][e][:title]} => #{name}"
+    @historyb << { output => clone }
+    
+    if Dir.entries("#{`echo $HOME`.chop}/.surf/.history/.icons/").include? "#{name}.ico"
+      puts "Error icon #{name}.ico exists"
+      return false
+
+    else system "cp '#{`echo $HOME`.chop}/.surf/.history/.icons/#{@bookmark[@groubs[g]][e][:title]}.ico' '#{`echo $HOME`.chop}/.surf/.history/.icons/#{name}.ico'" end
+
+    puts "added icon #{name}.ico"
+
+    @bookmark[@groubs[g]][e][:title] = name
+    puts output
+  end
+
 end
 
 if __FILE__ == $0
@@ -277,7 +321,7 @@ if __FILE__ == $0
       
     elsif input.split(" ").length == 4 and ["s", "shift", "m", "move"].include?( input.split(" ").first )
       input = input.split(" ").map{ |e| e.to_i }
-      bookmark.shift(input[0], input[1], input[2])
+      bookmark.shift(input[1], input[2], input[3])
 
     elsif ["r","redo"].include? input
       bookmark.step_for
@@ -309,6 +353,17 @@ if __FILE__ == $0
 
     elsif ["s","save"].include? input
       bookmark.save
+
+    elsif ["ng","name-groub", "rename-groub"].include? input.split(" ").first
+      groub = input.split(" ")[1].to_i
+      name = input.sub(" ", "CATONTHISPOSITION").sub(" ", "CATONTHISPOSITION").split("CATONTHISPOSITION").last
+      bookmark.rename_groub groub, name
+      
+    elsif ["nb","name-bookmark", "rename-bookmark"].include? input.split(" ").first
+      g = input.split(" ")[1].to_i
+      e = input.split(" ")[2].to_i
+      name = input.sub(" ", "CATONTHISPOSITION").sub(" ", "CATONTHISPOSITION").sub(" ", "CATONTHISPOSITION").split("CATONTHISPOSITION").last
+      bookmark.rename_bookmark g, e, name
       
     end
   end
