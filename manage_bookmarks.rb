@@ -339,6 +339,12 @@ if __FILE__ == $0
       puts "d\tdel\tdelete\t\tdelete groub or entrie"
       puts "  d <groub> <entrie>\n\n"
       puts "s\tsave\t\t\tsave changes to bookmark.txt"
+      puts "s/m\tshift/move\t\t\tmove an bookmark to another groub"
+      puts "  m <surce groub> <bookmark> <target groub>\n\n"
+      puts "ng\tname-groub\trename-groub\t\trename a groub"
+      puts "  ng <groub> <new name>\n\n"
+      puts "nb\tname-bookmark\trename-bookmark\t\trename a bookmark"
+      puts "nb <groub> <bookmark> <new name>\t\t"
       
     elsif ["d","del","delete"].include?( input.split(" ").first ) and [2,3].include?( input.split(" ").length )
       input = input.split(" ")
