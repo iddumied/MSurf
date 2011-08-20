@@ -8,19 +8,27 @@ end
 class Bookmark
   def initialize file
     @file = file.each_line.to_a.reverse.map{|e| e.chop}
-    @bookmark, @home = [],`echo $HOME`.chop
-    Dir.mkdir("#{@home}/.surf") unless Dir.exist?("#{@home}/.surf")
-    Dir.mkdir("#{@home}/.surf/.bookmark") unless Dir.exist?("#{@home}/.surf/.bookmark")
+    @bookmark = []
+    Dir.mkdir("#{ENV[ "HOME" ]}/.surf") unless Dir.exist?("#{ENV[ "HOME" ]}/.surf")
+    Dir.mkdir("#{ENV[ "HOME" ]}/.surf/.bookmark") unless Dir.exist?("#{ENV[ "HOME" ]}/.surf/.bookmark")
     
-    @curdate = { :year => Time.now.year, :month => Time.now.month, :day => Time.now.day, :hour => Time.now.hour, :minute => Time.now.min, :second => Time.now.sec } 
+    @curdate = time_now_hash 
+  end
+
+  def time_now_hash
+    hash = Hash.new
+    [ :year, :month, :day, :hour, :minute, :second ].each do |sym|
+      hash[ sym ] = Time.now.__send__ sym 
+    end
+    return hash
   end
   
   def parse
     @file.each do |line|
       date = Hash.new
       line.split("::").first.split(":").each_with_index do |e,i| 
-         e = e.to_i
-         date.store( [:day,:month,:year,:hour,:minute,:second].at(i), e )
+        e = e.to_i
+        date.store( [:day,:month,:year,:hour,:minute,:second].at(i), e )
       end
       
       groub = line.split("::")
@@ -51,14 +59,14 @@ class Bookmark
   end
 
   def to_html
-    html = File.new("#{@home}/.surf/.bookmark/bookmark.html","w")
+    html = File.new("#{ENV[ "HOME" ]}/.surf/.bookmark/bookmark.html","w")
     setup_html(html)
     @bookmark.each do |key,value|
       html.puts "<p class=\"caption\">#{key.to_s}</p>"
       value.each do |entry|
         date = sprintf("%02d.%02d.%d - %02d:%02d", entry[:date][:day], entry[:date][:month], entry[:date][:year], entry[:date][:hour], entry[:date][:minute]) 
 
-        html.puts "  <p class=\"entry\">&nbsp;&nbsp;&nbsp;&nbsp;<img src=\"#{@home}/.surf/.history/.icons/#{entry[:title]}.ico\" height=\"16px\" width=\"16px\" /> #{date} "
+        html.puts "  <p class=\"entry\">&nbsp;&nbsp;&nbsp;&nbsp;<img src=\"#{ENV[ "HOME" ]}/.surf/.history/.icons/#{entry[:title]}.ico\" height=\"16px\" width=\"16px\" /> #{date} "
         html.puts "    <a href=\"#{entry[:url]}\" target=\"_blank\">#{entry[:title]}</a>"
         html.puts "  </p>"
       end
@@ -97,10 +105,10 @@ end
 
 if __FILE__ == $0
   input = `echo \"Search Bookmarks\"| dmenu -fn \"-artwiz-cureextra-medium-r-normal--11-110-75-75-p-90-iso8859-1\" -sb \"#000000\" -nb \"#000000\" -nf \"#ffffff\" -sf \"#00aaff\"`.chop
-  bookmark = Bookmark.new( File.open("#{`echo $HOME`.chop}/.surf/bookmark.txt", :encoding => "BINARY") )
+  bookmark = Bookmark.new( File.open("#{ENV[ "HOME" ]}/.surf/bookmark.txt", :encoding => "BINARY") )
   bookmark.parse
   bookmark.groub
   bookmark.filter( input ) unless input == "Search Bookmarks"
   bookmark.to_html
-  system "xprop -id #{ARGV[0]} -f _SURF_GO 8s -set _SURF_GO file://#{`echo $HOME`.chop}/.surf/.bookmark/bookmark.html"
+  system "xprop -id #{ARGV[0]} -f _SURF_GO 8s -set _SURF_GO file://#{ENV[ "HOME" ]}/.surf/.bookmark/bookmark.html"
 end
