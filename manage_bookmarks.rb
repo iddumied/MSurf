@@ -15,6 +15,7 @@ class Bookmark
     Dir.mkdir("#{@home}/.surf/.bookmark") unless Dir.exist?("#{@home}/.surf/.bookmark")
     
     @curdate = { :year => Time.now.year, :month => Time.now.month, :day => Time.now.day, :hour => Time.now.hour, :minute => Time.now.min, :second => Time.now.sec } 
+    @historyb, @historyf = {},{}
   end
   
   def parse
@@ -74,6 +75,18 @@ class Bookmark
     end
   end
 
+  # parameter surce groub, surce element, targte groub
+  def shift sg, se, tg
+    @historyf = {}
+    output = "#{@groubs[sg]}: #{@bookmark[@groubs[sg]][se][:title]} => #{@groubs[tg]}"
+
+    @historyb.store(output, @bookmark.clone)
+    
+    @bookmark[@groubs[tg]] << @bookmark[@groubs[sg]].delete_at(se)
+    
+    puts output
+  end
+
 end
 
 if __FILE__ == $0
@@ -97,10 +110,13 @@ if __FILE__ == $0
     
     elsif input.split(" ").first == "ls"
        input = input.split(" ")
-       url = (input.include?("--url") or input.include?("-u"))
+       url = (input.include?("--url")  or input.include?("-u") or
+              input.include?("-a") or input.include?("--all")) ? true : false
 
        input.delete("--url")
        input.delete("-u")
+       input.delete("--all")
+       input.delete("-a")
        input.delete("ls")
        input.delete("")
        
@@ -110,6 +126,9 @@ if __FILE__ == $0
          bookmark.list input.join, url
        end
       
+    elsif input.split(" ").length == 3
+      input = input.split(" ").map{ |e| e.to_i }
+      bookmark.shift(input[0], input[1], input[2])
     end
   end
 
