@@ -10,68 +10,73 @@ end
 class Bookmark
   def initialize file
     @file = file.each_line.to_a.reverse.map{|e| e.chop}
-    @bookmark, @home = [],`echo $HOME`.chop
-    Dir.mkdir("#{@home}/.surf") unless Dir.exist?("#{@home}/.surf")
-    Dir.mkdir("#{@home}/.surf/.bookmark") unless Dir.exist?("#{@home}/.surf/.bookmark")
+    @bookmarks = Array.new
+    Dir.mkdir("#{ENV[ "HOME" ]}/.surf") unless Dir.exist?("#{ENV[ "HOME" ]}/.surf")
+    Dir.mkdir("#{ENV[ "HOME" ]}/.surf/.bookmark") unless Dir.exist?("#{ENV[ "HOME" ]}/.surf/.bookmark")
     
-    @curdate = { :year => Time.now.year, :month => Time.now.month, :day => Time.now.day, :hour => Time.now.hour, :minute => Time.now.min, :second => Time.now.sec } 
+    @curdate = time_now_hash
     @historyb, @historyf, @saved = [],[],false
+  end
+
+  def time_now_hash
+    hash = Hash.new
+    [ :year, :month, :day, :hour, :minute, :second ].each do |sym|
+      hash[ sym ] = Time.now.__send__ sym
+    end
+    return hash
   end
   
   def parse
     @file.each do |line|
       date = Hash.new
       line.split("::").first.split(":").each_with_index do |e,i| 
-         e = e.to_i
-         date.store( [:day,:month,:year,:hour,:minute,:second].at(i), e )
+        e = e.to_i
+        date.store( [:day,:month,:year,:hour,:minute,:second].at(i), e )
       end
       
-      groub = line.split("::")
-      groub.delete_at(0)
-      groub.delete_at(groub.length-1)
+      group = line.split("::")
+      group.delete_at(0)
+      group.delete_at(group.length-1)
       title = line.sub("::","CATONTHISPOSITION").sub("::","CATONTHISPOSITION").reverse.sub("::","CATONTHISPOSITION".reverse).reverse.split("CATONTHISPOSITION")[2]
-      groub = groub.first
+      group = group.first
 
-      @bookmark << { :date => date, :url => line.split("::").last, :title => title, :groub => groub }
+      @bookmarks << { :date => date, :url => line.split("::").last, :title => title, :group => group }
     end
   end
 
-  def groub
-    @groubs = []
+  def group
+    @groups = []
     
-    @bookmark.each { |hash| @groubs << hash[:groub] }
-    bookmark_ary = @bookmark
-    @bookmark = Hash.new
+    @bookmarks.each { |hash| @groups << hash[:group] }
+    bookmark_ary = @bookmarks
+    @bookmarks = Hash.new
 
-    @groubs.uniq!.each { |groub| @bookmark.store( groub, [] ) }
+    @groups.uniq!.each { |group| @bookmarks.store( group, [] ) }
     
-    @bookmark.keys.each do |groub|
+    @bookmarks.keys.each do |group|
       bookmark_ary.each do |hash|  
-        @bookmark[groub] << hash if hash[:groub] == groub 
+        @bookmarks[group] << hash if hash[:group] == group 
       end
     end
   end
 
-  def list(pgroub = true, url = false)
-    if  pgroub == true
+  def list(pgroup = true, url = false)
+    if  pgroup == true
     
-    elsif pgroub < 0 or pgroub >= @groubs.length
-      puts "There is no Groub #{pgroub}"    
+    elsif pgroup < 0 or pgroup >= @groups.length
+      puts "There is no group #{pgroup}"    
       return false
     
     end
 
-
-
-
     length = Curses.init_screen.maxx
     Curses.close_screen
 
-    @bookmark.each do |groub,elemnts|
-      i = @groubs.find_index(groub)
-      if pgroub == true or pgroub == i 
-        puts "(#{i}) #{groub}"
-        elemnts.each_with_index do |e,i| 
+    @bookmarks.each do |group,elements|
+      i = @groups.find_index(group)
+      if pgroup == true or pgroup == i 
+        puts "(#{i}) #{group}"
+        elements.each_with_index do |e,i| 
           output = "  #{i}: #{e[:title]}#{ url ? "  -  #{e[:url]}" : ""}"
           output.chop!.chop!.chop!.chop! << "..." until output.length <= (length-3)
 
@@ -85,45 +90,45 @@ class Bookmark
     end
   end
 
-  # parameter surce groub, surce element, targte groub
+  # parameter surce group, surce element, targte group
   def shift sg, se, tg
-    if sg < 0 or sg >= @groubs.length 
-      puts "There is no Groub #{sg}"    
+    if sg < 0 or sg >= @groups.length 
+      puts "There is no group #{sg}"    
       return false
     
-    elsif tg < 0 or tg >= @groubs.length
-      puts "There is no Groub #{tg}"    
+    elsif tg < 0 or tg >= @groups.length
+      puts "There is no group #{tg}"    
       return false
     
-    elsif @bookmark[@groubs[sg]][se].nil?
-      puts "Groub #{@groubs[sg]} has no entrie #{se}"
+    elsif @bookmarks[@groups[sg]][se].nil?
+      puts "group #{@groups[sg]} has no entrie #{se}"
       return false
 
     elsif tg == sg
-      puts "Warning target groub == source groub"
+      puts "Warning target group == source group"
     end
 
 
     @historyf = []
-    output = "#{@groubs[sg]}: #{@bookmark[@groubs[sg]][se][:title]} => #{@groubs[tg]}"
+    output = "#{@groups[sg]}: #{@bookmarks[@groups[sg]][se][:title]} => #{@groups[tg]}"
 
     @historyb << { output => clone }
     
-    @bookmark[@groubs[sg]][se][:groub] = @groubs[tg].clone
-    @bookmark[@groubs[tg]] << @bookmark[@groubs[sg]].delete_at(se)
+    @bookmarks[@groups[sg]][se][:group] = @groups[tg].clone
+    @bookmarks[@groups[tg]] << @bookmarks[@groups[sg]].delete_at(se)
     
     puts output
     @saved = false 
   end
 
-  def clone bookmark = @bookmark
+  def clone bookmark = @bookmarks
     cl = Hash.new
-    bookmark.each do |groub,ary|
-      cl.store(groub, Array.new)
+    bookmark.each do |group,ary|
+      cl.store(group, Array.new)
       ary.each do |hash|
-        cl[groub] << Hash.new
+        cl[group] << Hash.new
         hash.each do |k,v|
-          cl[groub][cl[groub].length-1].store(k,v.clone)
+          cl[group][cl[group].length-1].store(k,v.clone)
         end
       end
     end
@@ -139,8 +144,8 @@ class Bookmark
 
     @historyf << { @historyb.last.keys.first => clone }
     puts "undo :: #{@historyb.last.keys.first}"    
-    @bookmark = clone( @historyb.delete_at(@historyb.length-1).values.first )
-    @groubs = @bookmark.keys
+    @bookmarks = clone( @historyb.delete_at(@historyb.length-1).values.first )
+    @groups = @bookmarks.keys
     @saved = false
   end
   
@@ -152,37 +157,37 @@ class Bookmark
 
     @historyb << { @historyf.last.keys.first => clone }
     puts "redo :: #{@historyf.last.keys.first}"    
-    @bookmark = clone( @historyf.delete_at(@historyf.length-1).values.first )
-    @groubs = @bookmark.keys
+    @bookmarks = clone( @historyf.delete_at(@historyf.length-1).values.first )
+    @groups = @bookmarks.keys
     @saved = false
   end
 
   def del tg, te = -1
-    if tg < 0 or tg >= @groubs.length
-      puts "There is no Groub #{tg}"    
+    if tg < 0 or tg >= @groups.length
+      puts "There is no group #{tg}"    
       return false
     
     elsif te == -1
-       puts "Warning deleting groub"
+       puts "Warning deleting group"
 
-    elsif @bookmark[@groubs[tg]][te].nil?
-      puts "Groub #{@groubs[tg]} has no entrie #{se}"
+    elsif @bookmarks[@groups[tg]][te].nil?
+      puts "group #{@groups[tg]} has no entrie #{se}"
       return false
 
     end
 
     @historyf = []
     if te == -1
-      output = "delete => #{@groubs[tg]}"
+      output = "delete => #{@groups[tg]}"
 
       @historyb << { output => clone }
-      @bookmark.delete(@groubs[tg])
+      @bookmarks.delete(@groups[tg])
 
     else
-      output = "delete => #{@groubs[tg]}: #{@bookmark[@groubs[tg]][te][:title]}"
+      output = "delete => #{@groups[tg]}: #{@bookmarks[@groups[tg]][te][:title]}"
 
       @historyb << { output => clone }
-      @bookmark[@groubs[tg]].delete_at(te)
+      @bookmarks[@groups[tg]].delete_at(te)
     end
     
     puts output
@@ -203,7 +208,7 @@ class Bookmark
     puts "backup bookmark.txt => bookmark.txt.old.#{number}"
 
     ary = []
-    @bookmark.each do |k,v|
+    @bookmarks.each do |k,v|
       v.each do |entry|
         ary << [ entry[:date][:second] + entry[:date][:minute]*60 +
                   entry[:date][:hour]*60*60 + entry[:date][:day]*60*60*24 +
@@ -220,7 +225,7 @@ class Bookmark
                             entry[:date][:year], entry[:date][:hour], entry[:date][:minute],
                             entry[:date][:second] ) 
 
-      file.puts "#{date}::#{entry[:groub]}::#{entry[:title]}::#{entry[:url]}"
+      file.puts "#{date}::#{entry[:group]}::#{entry[:title]}::#{entry[:url]}"
     end
     file.close
     puts "saved #{@historyb.length} changes to bookmark.txt"
@@ -239,61 +244,60 @@ class Bookmark
     return ary.delete_at(index).last
   end
 
-  def rename_groub( groub, name )
-    if groub < 0 or groub >= @groubs.length 
-      puts "There is no Groub #{groub}"    
+  def rename_group( group, name )
+    if group < 0 or group >= @groups.length 
+      puts "There is no group #{group}"    
       return false
     end
 
     @historyf = []
-    output = "renamed: #{@groubs[groub]} => #{name}"
+    output = "renamed: #{@groups[group]} => #{name}"
     @historyb << { output => clone }
 
-    @bookmark[name] = @bookmark.delete(@groubs[groub]).map{|hash| hash[:groub] = name; hash }
-    @groubs[groub] = name
+    @bookmarks[name] = @bookmarks.delete(@groups[group]).map{|hash| hash[:group] = name; hash }
+    @groups[group] = name
     puts output
   end
 
   def rename_bookmark( g,e, name )
-    if g < 0 or g >= @groubs.length 
-      puts "There is no Groub #{g}"    
+    if g < 0 or g >= @groups.length 
+      puts "There is no group #{g}"    
       return false
     
-    elsif @bookmark[@groubs[g]][e].nil?
-      puts "Groub #{@groubs[g]} has no entrie #{e}"
+    elsif @bookmarks[@groups[g]][e].nil?
+      puts "group #{@groups[g]} has no entrie #{e}"
       return false
 
     end
 
     @historyf = []
-    output = "renamed: #{@groubs[g]}: #{@bookmark[@groubs[g]][e][:title]} => #{name}"
+    output = "renamed: #{@groups[g]}: #{@bookmarks[@groups[g]][e][:title]} => #{name}"
     @historyb << { output => clone }
     
     if Dir.entries("#{`echo $HOME`.chop}/.surf/.history/.icons/").include? "#{name}.ico"
       puts "Error icon #{name}.ico exists"
       return false
 
-    else system "cp '#{`echo $HOME`.chop}/.surf/.history/.icons/#{@bookmark[@groubs[g]][e][:title]}.ico' '#{`echo $HOME`.chop}/.surf/.history/.icons/#{name}.ico'" end
+    else system "cp '#{`echo $HOME`.chop}/.surf/.history/.icons/#{@bookmarks[@groups[g]][e][:title]}.ico' '#{`echo $HOME`.chop}/.surf/.history/.icons/#{name}.ico'" end
 
     puts "added icon #{name}.ico"
 
-    @bookmark[@groubs[g]][e][:title] = name
+    @bookmarks[@groups[g]][e][:title] = name
     puts output
   end
 
 end
 
 if __FILE__ == $0
-  bookmark = Bookmark.new( File.open("#{`echo $HOME`.chop}/.surf/bookmark.txt", :encoding => "BINARY") )
+  bookmark = Bookmark.new( File.open("#{ENV[ "HOME" ]}/.surf/bookmark.txt", :encoding => "BINARY") )
   bookmark.parse
-  bookmark.groub
+  bookmark.group
   bookmark.list
 
   # main loop
   loop do
     print "bookmarks ~> "
     input = gets.chop 
-
 
     if ["q", "quit"].include? input
         puts "exit.."
@@ -307,17 +311,10 @@ if __FILE__ == $0
        url = (input.include?("--url")  or input.include?("-u") or
               input.include?("-a") or input.include?("--all")) ? true : false
 
-       input.delete("--url")
-       input.delete("-u")
-       input.delete("--all")
-       input.delete("-a")
-       input.delete("ls")
-       input.delete("")
+      [ "--url", "-u", "--all", "-a", "ls" ].each { |s| input.delete( s ) }
        
-       if input.empty?
-         bookmark.list true, url
-       else
-         bookmark.list input.join.to_i, url
+       if input.empty? then bookmark.list( true, url )
+       else bookmark.list( input.join.to_i, url )
        end
       
     elsif input.split(" ").length == 4 and ["s", "shift", "m", "move"].include?( input.split(" ").first )
@@ -331,21 +328,21 @@ if __FILE__ == $0
       bookmark.step_back
 
     elsif ["h", "help"].include? input
-      puts "ls <opt> <groub>\t\tlist groubs and etries"
+      puts "ls <opt> <group>\t\tlist groups and etries"
       puts "  --url --all -u -a\t\t+url"
-      puts "  <groub>\t\t\tlist onley similar groub\n\n"
+      puts "  <group>\t\t\tlist onley similar group\n\n"
       puts "q\tquit\t\t\texit programm"
       puts "u\tundo\t\t\tundo last change"
       puts "r\tredo\t\t\tredo last undone change"
-      puts "d\tdel\tdelete\t\tdelete groub or entrie"
-      puts "  d <groub> <entrie>\n\n"
+      puts "d\tdel\tdelete\t\tdelete group or entrie"
+      puts "  d <group> <entrie>\n\n"
       puts "s\tsave\t\t\tsave changes to bookmark.txt"
-      puts "s/m\tshift/move\t\t\tmove an bookmark to another groub"
-      puts "  m <surce groub> <bookmark> <target groub>\n\n"
-      puts "ng\tname-groub\trename-groub\t\trename a groub"
-      puts "  ng <groub> <new name>\n\n"
+      puts "s/m\tshift/move\t\t\tmove an bookmark to another group"
+      puts "  m <surce group> <bookmark> <target group>\n\n"
+      puts "ng\tname-group\trename-group\t\trename a group"
+      puts "  ng <group> <new name>\n\n"
       puts "nb\tname-bookmark\trename-bookmark\t\trename a bookmark"
-      puts "nb <groub> <bookmark> <new name>\t\t"
+      puts "nb <group> <bookmark> <new name>\t\t"
       
     elsif ["d","del","delete"].include?( input.split(" ").first ) and [2,3].include?( input.split(" ").length )
       input = input.split(" ")
@@ -361,10 +358,10 @@ if __FILE__ == $0
     elsif ["s","save"].include? input
       bookmark.save
 
-    elsif ["ng","name-groub", "rename-groub"].include? input.split(" ").first
-      groub = input.split(" ")[1].to_i
+    elsif ["ng","name-group", "rename-group"].include? input.split(" ").first
+      group = input.split(" ")[1].to_i
       name = input.sub(" ", "CATONTHISPOSITION").sub(" ", "CATONTHISPOSITION").split("CATONTHISPOSITION").last
-      bookmark.rename_groub groub, name
+      bookmark.rename_group group, name
       
     elsif ["nb","name-bookmark", "rename-bookmark"].include? input.split(" ").first
       g = input.split(" ")[1].to_i
