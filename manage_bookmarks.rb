@@ -20,7 +20,7 @@ class Bookmark
 
   def time_now_hash
     hash = Hash.new
-    [ :year, :month, :day, :hour, :minute, :second ].each do |sym|
+    [ :year, :month, :day, :hour, :min, :sec ].each do |sym|
       hash[ sym ] = Time.now.__send__ sym
     end
     return hash
@@ -31,7 +31,7 @@ class Bookmark
       date = Hash.new
       line.split("::").first.split(":").each_with_index do |e,i| 
         e = e.to_i
-        date.store( [:day,:month,:year,:hour,:minute,:second].at(i), e )
+        date.store( [:day,:month,:year,:hour,:min,:sec].at(i), e )
       end
       
       group = line.split("::")
@@ -210,7 +210,7 @@ class Bookmark
     ary = []
     @bookmarks.each do |k,v|
       v.each do |entry|
-        ary << [ entry[:date][:second] + entry[:date][:minute]*60 +
+        ary << [ entry[:date][:sec] + entry[:date][:min]*60 +
                   entry[:date][:hour]*60*60 + entry[:date][:day]*60*60*24 +
                   entry[:date][:month]*60*60*24*31 + entry[:date][:year]*60*60*24*31*12, entry ]
       end
@@ -222,8 +222,8 @@ class Bookmark
       entry = del_min( ary )
 
       date = sprintf("%02d:%02d:%d:%02d:%02d:%02d",entry[:date][:day], entry[:date][:month],
-                            entry[:date][:year], entry[:date][:hour], entry[:date][:minute],
-                            entry[:date][:second] ) 
+                            entry[:date][:year], entry[:date][:hour], entry[:date][:min],
+                            entry[:date][:sec] ) 
 
       file.puts "#{date}::#{entry[:group]}::#{entry[:title]}::#{entry[:url]}"
     end
