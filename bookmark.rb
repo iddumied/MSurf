@@ -17,7 +17,7 @@ class Bookmark
 
   def time_now_hash
     hash = Hash.new
-    [ :year, :month, :day, :hour, :minute, :second ].each do |sym|
+    [ :year, :month, :day, :hour, :min, :sec ].each do |sym|
       hash[ sym ] = Time.now.__send__ sym 
     end
     return hash
@@ -28,7 +28,7 @@ class Bookmark
       date = Hash.new
       line.split("::").first.split(":").each_with_index do |e,i| 
         e = e.to_i
-        date.store( [:day,:month,:year,:hour,:minute,:second].at(i), e )
+        date.store( [:day,:month,:year,:hour,:min,:sec].at(i), e )
       end
       
       groub = line.split("::")
@@ -63,7 +63,7 @@ class Bookmark
     @bookmark.each do |key,value|
       html.puts "<p class=\"caption\">#{key.to_s}</p>"
       value.each do |entry|
-        date = sprintf("%02d.%02d.%d - %02d:%02d", entry[:date][:day], entry[:date][:month], entry[:date][:year], entry[:date][:hour], entry[:date][:minute]) 
+        date = sprintf("%02d.%02d.%d - %02d:%02d", entry[:date][:day], entry[:date][:month], entry[:date][:year], entry[:date][:hour], entry[:date][:min]) 
 
         html.puts "  <p class=\"entry\">&nbsp;&nbsp;&nbsp;&nbsp;<img src=\"#{ENV[ "HOME" ]}/.surf/.history/.icons/#{entry[:title]}.ico\" height=\"16px\" width=\"16px\" /> #{date} "
         html.puts "    <a href=\"#{entry[:url]}\" target=\"_blank\">#{entry[:title]}</a>"
