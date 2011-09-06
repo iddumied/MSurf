@@ -5,6 +5,7 @@ void setup_home_path();
 
 void save_to_history(Client *c)
 {
+  int i;
   const gchar *icon  = webkit_web_view_get_icon_uri(c->view);
   const gchar *title = webkit_web_view_get_title(c->view);
   if(*icon != NULL){
@@ -32,8 +33,13 @@ void save_to_history(Client *c)
   fprintf(f, curdate);
   fprintf(f, (char*)title);
   fprintf(f, "::");
-  printf("\nOpend url: %s\n",uri);
-  fprintf(f, uri);
+
+  printf("\nOpend url: ");
+  for(i = 0; i < strlen(uri);i++){ 
+    printf("%c",uri[i]);
+    fprintf(f,"%c", uri[i]);
+  }
+  printf("\n");
   fprintf(f, "\n");
   fclose(f);
 }
